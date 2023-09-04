@@ -38,14 +38,9 @@ def patient():
     patient = pd.read_csv("./data/patients.csv.gz", compression='gzip', error_bad_lines=False)
     return patient
 
-def disease():
-    disease = pd.read_csv("./data/disease.csv.gz", compression='gzip', error_bad_lines=False)
-    return disease
-
 a = data()
 b = admin()
 c = patient()
-d = disease()
 
 def prediction_los(input_data):
     load_model = pkl.load(open('./data/los_model.sav', 'rb'))
