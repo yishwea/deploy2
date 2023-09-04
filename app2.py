@@ -14,15 +14,6 @@ import pickle as pkl
 
 st.set_page_config(page_title="LOS Prediction",page_icon="⚕️",layout="wide",initial_sidebar_state="expanded")
 
-# html_temp = """ 
-# <div style ="padding:13px;padding-bottom:50px"> 
-# <h1 style ="color:white;text-align:center;">Prediction and Visualization Length of Stay in Hospital</h1> 
-# </div> 
-# """
-
-# display the front end aspect
-# st.markdown(html_temp, unsafe_allow_html = True) 
-
 @st.cache_data
 def data():
     data = pd.read_csv("./data/los.csv.gz", compression='gzip', error_bad_lines=False)
