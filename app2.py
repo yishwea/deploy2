@@ -29,12 +29,6 @@ def patient():
     return patient
 
 @st.cache_data
-def disease_model():
-    with gzip.open('./data/disease_model.sav.gz', 'rb') as f:
-        model = pkl.load(f)
-    return model
-
-@st.cache_data
 def los_model():
     model = pkl.load(open('./data/los_model.sav', 'rb'))
     return model
