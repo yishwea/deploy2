@@ -4,7 +4,6 @@ import numpy as np
 import pandas  as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-import pickle
 from sklearn.linear_model import LogisticRegression
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
@@ -29,24 +28,23 @@ def patient():
     patient = pd.read_csv("./data/patients.csv.gz", compression='gzip', error_bad_lines=False)
     return patient
 
+@st.cache_data
+def disease_model():
+    with gzip.open('./data/disease_model.sav.gz', 'rb') as f:
+        model = pkl.load(f)
+    return model
+
+@st.cache_data
+def los_model():
+    model = pkl.load(open('./data/los_model.sav', 'rb'))
+    return model
+    
 a = data()
 b = admin()
 c = patient()
+f = los_model()
 
-def prediction_los(input_data):
-    load_model = pkl.load(open('./data/los_model.sav', 'rb'))
-
-    input_data_as_numpy_array = np.asarray(input_data)
-    # Convert the tuple to a 2D numpy array
-    input_data_reshaped = input_data_as_numpy_array.reshape(1, -1)
-
-    # Now you can use the model to predict
-    predict_los = load_model.predict(input_data_reshaped)
-    predictions = predict_los[0]
-    st.header("Predicted LOS:")
-    st.write(predictions, 'days')
-
-def los_prediction():
+def los_prediction(f):
     html_temp = """ 
         <div style ="padding:13px;padding-bottom:50px"> 
         <h1 style ="color:white;text-align:center;">Length of Stay Prediction</h1> 
@@ -54,89 +52,18 @@ def los_prediction():
         """
     st.markdown(html_temp, unsafe_allow_html = True) 
     st.write("---")
-    st.header("PLEASE INPUT THE MEDICAL RECORD")
-    input_data = list()
-    col1,col2,col3 = st.columns(3)
-
-    with col1:
-        anion_gap = st.text_input("Anion Gap Level")
-        co2 = st.text_input("Calculated Total CO2 Level")
-        free_calcium = st.text_input('Free Calcium Level')
-        hematocrit = st.text_input('Hematocrit Level')
-        i = st.text_input('I Level')
-        lactate = st.text_input('Lactate Level')
-        mcv = st.text_input('Mean Corpuscular Volume Level')
-        pt = st.text_input('Prothrombin Time')
-        phosphate = st.text_input('Phosphate Level')
-        potassium_WB = st.text_input('Potassium Whole Blood Level')
-        rapamycin = st.text_input('Rapamycin Level')
-        urea_nitrogen = st.text_input('Urea Nitrogen Level')
-        pH = st.text_input('pH Level')
-        temp_gender = st.radio('Gender',
-                          ("Male",
-                           "Female"
-                          ))
-        if temp_gender == 'Male':
-            gender = '0'
-        else:
-            gender = '1'
-        diastolic_blood_pressure = st.text_input('Arterial Blood Pressure Diastolic Level')
-        eye_opening = st.text_input('GCS - Eye Opening')
-        heart_rate = st.text_input('Heart Rate')
-        nibp_mean = st.text_input('Non Invasive Blood Pressure Mean Level')
-        resp_rate = st.text_input('Respiratory Rate')
-
-    with col2:
-        bicarbonate = st.text_input("Bicarbonate Level")
-        chloride = st.text_input("Chloride Level")
-        glucose = st.text_input('Glucose Level')
-        hemoglobin = st.text_input('Hemoglobin Level')
-        inr = st.text_input('INR(P/T) Level')
-        mch = st.text_input('Mean Corpuscular Hemoglobin Level')
-        magnesium = st.text_input('Magnesium Level')
-        ptt = st.text_input('Partial Thromboplastin Time')
-        platelet_count = st.text_input('Platelet Count Level')
-        rdw = st.text_input('Red Cell Distribution Width') 
-        red_blood_cell = st.text_input('Red Blood Cells Level')
-        white_blood_cell = st.text_input('White Blood Cells Level')
-        po2 = st.text_input('PO2 Level')
-        age = st.text_input('Age')
-        arterial_blood_pressure_mean = st.text_input('Arterial Blood Pressure Mean Level')
-        motor_response = st.text_input('GCS - Motor Response')
-        o2_fraction = st.text_input('Inspired O2 Fraction Level')
-        nibp_systolic = st.text_input('Non Invasive Blood Pressure Systolic Level')
-        temperature = st.text_input('Temperature (°F)')
-        
-    with col3:        
-        calcium = st.text_input('Total Calcium Level')
-        creatinine = st.text_input('Creatinine Level')
-        h = st.text_input('H Level')
-        heparin = st.text_input('Heparin Level')
-        l = st.text_input('L Level')
-        mchc = st.text_input('Mean Corpuscular Hemoglobin Concentration Level')
-        oxy_saturation = st.text_input('Oxygen Saturation Level')
-        phenobarbital = st.text_input('Phenobarbital Level')
-        potassium = st.text_input('Potassium Level')
-        rdw_sd = st.text_input('Red Cell Distribution Width - Standard Deviation Level')
-        sodium = st.text_input('Sodium Level')
-        pco2 = st.text_input('pCO2 Level')
-        tacroFK = st.text_input('Tacrolimus FK Level')
-        jh_hlm = st.text_input('Activity / Mobility (JH-HLM)')
-        systolic_blood_pressure = st.text_input('Arterial Blood Pressure Systolic Level')
-        verbal_response = st.text_input('GCS - Verbal Response')
-        nibp_diastolic = st.text_input('Non Invasive Blood Pressure Diastolic Level')
-        o2_saturation = st.text_input('O2 Saturation Pulseoxymetry Level')
-        
-    if st.button('LOS Result'):
-        input_data.extend([anion_gap, bicarbonate, calcium, co2, chloride, creatinine, free_calcium, glucose, h, hematocrit, hemoglobin, heparin, i, inr, l,
-                      lactate, mch, mchc, mcv, magnesium, oxy_saturation, pt, ptt, phenobarbital, phosphate, platelet_count, potassium, potassium_WB, rdw,
-                      rdw_sd, rapamycin, red_blood_cell, sodium, urea_nitrogen, white_blood_cell, pco2, pH, po2, tacroFK, gender, age, jh_hlm, diastolic_blood_pressure,
-                      arterial_blood_pressure_mean, systolic_blood_pressure, eye_opening, motor_response, verbal_response, heart_rate, o2_fraction, nibp_diastolic, nibp_mean,
-                      nibp_systolic, o2_saturation, resp_rate, temperature])
-        
-
-        numeric_input_data = [float(value) if value and value != "0" else 0 for value in input_data]
-        prediction_los(numeric_input_data)
+    st.header("PLEASE UPLOAD THE MEDICAL RECORD")
+    uploaded_file = st.file_uploader("Upload your file here...", type=['csv'])
+    trained_model = f
+    if uploaded_file is not None:
+        dataframe = pd.read_csv(uploaded_file)
+        dataframe.fillna(0, inplace=True)
+        result = trained_model.predict(dataframe)
+    
+    if st.button('Show Result') and result is not None:
+        patient_id = [f'P{i:03}' for i in range(1, len(result) + 1)]
+        prediction_df = pd.DataFrame({'Patient_ID': patient_id, 'Length_of_Stay': result})
+        st.table(prediction_df.style.hide_index())
 
 def los_visualization_menu(a,b,c):
         html_temp = """ 
@@ -253,10 +180,9 @@ def los_filter(a):
         fig1.update_layout(width=800, height=600)
         st.plotly_chart(fig1, use_container_width=True)
 
-page = st.sidebar.selectbox('SELECT PAGE',['LOS-Predictions','LOS-Visualization']) 
-st.sidebar.write("---")
+
+page = st.sidebar.selectbox('SELECT PAGE',['LOS-Predictions','LOS-Visualization'])
 if page == 'LOS-Predictions':
-    los_prediction()
+    los_prediction(f)
 else:
     los_visualization_menu(a,b,c)
-
